@@ -47,11 +47,18 @@ class AutentificacionController extends Controller
         );
         return response()->json($respuesta);
     }
-    public function perfil(){
-
+    public function perfil(Request $request){
+        $informacion = $request->user();
+        
+        return response()->json($informacion);
     }
-    public function cerrarSesion(){
-
+    public function cerrarSesion(Request $request){
+        $informacion = $request->user();
+        $informacion->token()->revoke();
+        $mensaje = [
+            'mensaje'=> 'Cierre de sesion exitoso'
+        ];
+        return response()->json($mensaje);
     }
     //
 }

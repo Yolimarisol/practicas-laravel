@@ -42,7 +42,7 @@ Route::post("/productos/insertar",[ProductoController::class,"insertar"]);
 Route::post("/auto/registro",[AutentificacionController::class,"registro"]);
 Route::post("/auto/iniciar-sesion",[AutentificacionController::class,"iniciarSesion"]);
 
-Route::middleware(['api:auth'])->group(function(){
-    Route::post("/auto/perfil",[AutentificacionController::class,"perfil"]);
-    Route::post("/auto/cerrar-sesion",[AutentificacionController::class,"cerrarSesion"]);
+Route::middleware(['auth:api'])->group(function(){
+    Route::get("/auto/perfil",[AutentificacionController::class,"perfil"]);
+    Route::get("/auto/cerrar-sesion",[AutentificacionController::class,"cerrarSesion"]);
 });
