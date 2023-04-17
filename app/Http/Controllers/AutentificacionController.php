@@ -6,27 +6,49 @@ use Illuminate\Http\Request;
 use DateTime;
 use Auth;
 use Carbon\Carbon;
+//Libreria para formatear texto
+use illuminate\Support\Str;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Storage;
 
 class AutentificacionController extends Controller
 {
     public function registro(Request $request){
+    
         $actual = new DateTime();
-        $data = array(
-            'usuario'=> $request->usuario,
-            'correo'=> $request->correo,
-            'password'=> bcrypt($request->password),
-            "fecha_registro" =>$actual,
-        "fecha_actualizacion"=>$actual,
-        "estado"=>1
-        );
-        $nuevoUsuario =new User($data);
-        $nuevoUsuario->save();
-        $mensaje =array(
-            'mensaje'=> "usuario registrado con exito"
-        );
-
-        return response()->json($mensaje);
-    }
+    
+        //Aqui se almacena la imagen
+        $imagen=$request->file('foto');
+        //Obtenemos la extension de la imagen 
+        $extension=$imagen->extension();
+    
+        //Ejemplo: Victor Jose Lòpez(victor-jose-lopez)
+        $nombreImagen =Str::slug($request->usuario) .".".$extension;
+        //Slug:cadena unica para identificar un registro
+    
+                $data = array(
+                'usuario' => $request->usuario,
+                'foto_perfil'=>$nombreImagen,
+                'correo' => $request->correo,
+                'password' => bcrypt($request->password),
+                'estado'=>1,
+                'fecha_creacion'=>$actual,
+                'fecha_actualizacion'=>$actual,
+            );
+            //Moviendo iamgen a carpeta store
+            $imagen->storeAS('fotos-perfil/',$nombreImagen);
+    
+            $nuevoUsuario = new User($data);
+            $nuevoUsuario->save();
+            $mensaje = array(
+                'mensaje' =>"Usuario registrado exitosamente."
+            );
+            
+    
+            return response()->json($mensaje);
+    
+        }
     public function iniciarSesion(Request $request){
         $credenciales = request([ 'correo', 'password']);
         if (Auth::attempt($credenciales) == false){
@@ -60,5 +82,18 @@ class AutentificacionController extends Controller
         ];
         return response()->json($mensaje);
     }
-    //
+
+    public function verFotoPerfil($nombreimagen)
+    {
+        $ruta = storage_path('app/fotos-perfil'. $nombreimagen);
+        if(file_exists($ruta) == false){
+            abort(404);
+        }
+    }
+    //obtenemos el archivo de imagen
+    $imagen = File::get($ruta);
+    $tipo = File::mimeType($ruta);
+    $respuesta=Response::make($imagen,200);
+    $respuesta->header("Content-Type", $tipo);
+    return $respuesta;
 }
