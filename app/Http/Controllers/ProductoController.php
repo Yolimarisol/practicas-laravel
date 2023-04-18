@@ -61,11 +61,39 @@ class ProductoController extends Controller
         return response()->json($nuevoProducto);
     }
 
-    public function actualizar(Request $request){
-        
+    public function actualizar(Request $request, $id)
+    {
+        /*Se solicitarán los datos de nombre, descripcion y fecha de actualización para hacer 
+        la consulta*/
+        $producto=Producto::where("id", $id)->first();
+        $producto->producto = $request->producto;
+        $producto->descripcion = $request->descripcion;
+        $producto->precio_unitario = $request->precio_unitario;
+        $producto->categoria_id= $request->categoria_id;
+        $producto->fecha_actualizacion = (new DateTime())->format("Y-m-d H:i:s");
+
+        $producto->save(); //Guarda los datos
+
+        return response()->json($producto); //Devuelve los datos de la variable $categoria
     }
-    public function eliminar(Request $request){
-        
+    public function eliminar(Request $request, $id)
+    {
+        $producto=Producto::where("id",$id)->first();
+        //Validando que el registro exista
+             if($producto == null){
+                    $mensaje=array(
+                    'error'=>"Producto no encontrado."
+              );
+             //Respuesta para categoria no encontrada -404
+             return response()->json($mensaje, 404);
+            }
+            $producto-> estado = 0;
+            $producto->save();
+       
+            $borrado=array(
+             'Exito'=> "Producto borrado exitosamente"
+            );  
+       return response()->json($borrado);
     }
    
 }
